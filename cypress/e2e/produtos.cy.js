@@ -1,12 +1,12 @@
 /// <reference types="cypress"/>
 
 
-describe('Testes de funcionalidade de produtos', ()=>{
+describe('Testes de funcionalidade de produtos', () => {
     let token
     before(() => {
-        cy.token('dalvinha@qa.com.br', 'teste').then(tkn=>{ token = tkn })
+        cy.token('dalvinha@qa.com.br', 'teste').then(tkn => { token = tkn })
     });
-    it('Listar produtos', () =>{
+    it('Listar produtos', () => {
         cy.request({
             method: 'GET',
             url: 'http://localhost:3000/produtos'
@@ -18,12 +18,12 @@ describe('Testes de funcionalidade de produtos', ()=>{
         })
     });
     it('cadastrar produto', () => {
-        let produto =`produto Ebac ${Math.floor(Math.random() * 10000)}`
+        let produto = `produto Ebac ${Math.floor(Math.random() * 10000)}`
         cy.request({
             method: 'POST',
             url: "produtos",
             body: {
-                "nome":produto,
+                "nome": produto,
                 "preco": 200,
                 "descricao": "produto novo",
                 "quantidade": 100
@@ -40,7 +40,7 @@ describe('Testes de funcionalidade de produtos', ()=>{
             method: 'POST',
             url: "produtos",
             body: {
-                "nome":"produto EBAC 5116",
+                "nome": "produto EBAC 5116",
                 "preco": 200,
                 "descricao": "produto novo",
                 "quantidade": 100
@@ -51,5 +51,12 @@ describe('Testes de funcionalidade de produtos', ()=>{
             expect(response.status).to.equal(400)
             expect(response.body.message).to.equal('Já existe produto com esse nome')
         })
+    });
+    it.only('fazer o cadastro com comando customizado', () => {
+        cy.cadastrarProduto(token, "produtinho 1123", 300, "produto criado para teste",25)
+            .then((response) => {
+                expect(response.status).to.equal(400)
+                expect(response.body.message).to.equal('Já existe produto com esse nome')
+            })
     });
 });
