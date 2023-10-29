@@ -1,32 +1,55 @@
 /// <reference types="cypress"/>
 
-describe('Testes de funcionalidade de produtos', () => {
-    it.only('Listar produtos', () => {
+
+describe('Testes de funcionalidade de produtos', ()=>{
+    let token
+    before(() => {
+        cy.token('dalvinha@qa.com.br', 'teste').then(tkn=>{ token = tkn })
+    });
+    it('Listar produtos', () =>{
         cy.request({
-            method:'GET',
+            method: 'GET',
             url: 'http://localhost:3000/produtos'
         }).then((response) => {
-           expect(response.body.produtos[1]. nome).to.equal('Logitech MX Vertical')
-           expect(response.status).to .equal(200)
-           expect(response.body).to.have.property('produtos')
-           expect(response.duration).to.be.lessThan(20)
+            expect(response.body.produtos[1].nome).to.equal('Logitech MX Vertical')
+            expect(response.status).to.equal(200)
+            expect(response.body).to.have.property('produtos')
+            expect(response.duration).to.be.lessThan(20)
         })
     });
     it('cadastrar produto', () => {
-         cy.request({
+        let produto =`produto Ebac ${Math.floor(Math.random() * 10000)}`
+        cy.request({
             method: 'POST',
-            url:"produtos",
+            url: "produtos",
             body: {
-                "nome":"produto produtivo",
+                "nome":produto,
                 "preco": 200,
                 "descricao": "produto novo",
-                "quantidade":100
+                "quantidade": 100
             },
-            headers:{Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRhbHZpbmhhQHFhLmNvbS5iciIsInBhc3N3b3JkIjoidGVzdGUiLCJpYXQiOjE2OTg1MjI5NDcsImV4cCI6MTY5ODUyMzU0N30.b5hNdm_UUgXERzmzXTxXrEhm7kQhC0-E1zUcoIVjQa8"}
-        }).then((response)=>{
-            expect(ressponse.status).to.equal(200)
-            expect(ressponse.body.message).to.equal('Cadastro realizadocom sucesso')
-            
+            headers: { Authorization: token }
+        }).then((response) => {
+            expect(response.status).to.equal(201)
+            expect(response.body.message).to.equal('Cadastro realizado com sucesso')
+
+        })
+    });
+    it('deve validar mensagem de erro ao cadastrar produto repetido', () => {
+        cy.request({
+            method: 'POST',
+            url: "produtos",
+            body: {
+                "nome":"produto EBAC 5116",
+                "preco": 200,
+                "descricao": "produto novo",
+                "quantidade": 100
+            },
+            failOnStatusCode: false,
+            headers: { Authorization: token }
+        }).then((response) => {
+            expect(response.status).to.equal(400)
+            expect(response.body.message).to.equal('Já existe produto com esse nome')
         })
     });
 });
