@@ -31,13 +31,11 @@ Cypress.Commands.add('token', (email, senha) => {
         "email": email,
         "password": senha
         }
-
-
     }).then((response) => {
         expect(response.status).to.equal(200)
         return response.body.authorization
     })
-})
+}),
 Cypress.Commands.add('cadastrarProduto', (token, produto, preco, descricao, quantidade)=>{
     cy.request({
         method: 'POST',
@@ -47,7 +45,7 @@ Cypress.Commands.add('cadastrarProduto', (token, produto, preco, descricao, quan
             "nome": produto,
             "preco": preco,
             "descricao": descricao,
-            "quantidade": quantidade
+            "quantidade": quantidade,
         },
         failOnStatusCode: false,
     })

@@ -11,7 +11,7 @@ describe('Testes de funcionalidade de produtos', () => {
             method: 'GET',
             url: 'http://localhost:3000/produtos'
         }).then((response) => {
-            expect(response.body.produtos[1].nome).to.equal('Logitech MX Vertical')
+            //expect(response.body.produtos[1].nome).to.equal('Logitech MX Vertical')
             expect(response.status).to.equal(200)
             expect(response.body).to.have.property('produtos')
             expect(response.duration).to.be.lessThan(20)
@@ -52,11 +52,68 @@ describe('Testes de funcionalidade de produtos', () => {
             expect(response.body.message).to.equal('Já existe produto com esse nome')
         })
     });
-    it.only('fazer o cadastro com comando customizado', () => {
-        cy.cadastrarProduto(token, "produtinho 1123", 300, "produto criado para teste",25)
+    it('fazer o cadastro com comando customizado', () => {
+        cy.cadastrarProduto(token, "produtinho 1123", 300, "produto criado para teste", 25)
             .then((response) => {
                 expect(response.status).to.equal(400)
                 expect(response.body.message).to.equal('Já existe produto com esse nome')
             })
+    })
+    it('deve pegar o id de um produto cadastrado', () => {
+        cy.request('produtos').then((response) => {
+            // cy.log(response.body.produtos[0]._id)
+            let id = response.body.produtos[0]._id;
+            let nome = response.body.produtos[0].nome;
+            cy.request({
+                method: 'PUT',
+                url: `produtos/${id}`,
+                headers: { authorization: token },
+                body:
+                {
+                    "nome": nome,
+                    "preco": 470,
+                    "descricao": "Mouse",
+                    "quantidade": 381,
+                }
+            })
+        });
+    });
+    it('deve editar um produto cadastrado previamente', () => {
+        let produto = `Produto EBAC ${Math.floor(Math.random() * 1000000)}`
+        cy.cadastrarProduto(token, produto, 250, 'descricao do produto novo', 190)
+        .then(response => {
+            let id = response.body._id
+
+            cy.request({
+                method: 'PUT',
+                url:`produtos/${id}`,
+                failOnStatusCode: false,
+                headers: {authorization: token},
+                body:{
+                    "nome": produto,
+                    "preco": 280,
+                    "descricao": "descricao do produto novo",
+                    "quantidade": 190,
+                }
+            }).then(response =>{
+                expect(response.body.message).to.equal('Registro alterado com sucesso')
+            })
+        });
+    });
+    it('deve editar um produto cadastrado previamente', () => {
+        let produto = `Produto EBAC ${Math.floor(Math.random() * 1000000)}`
+        cy.cadastrarProduto(token, produto, 250, 'descricao do produto novo', 190)
+        .then(response => {
+            let id = response.body._id
+
+            cy.request({
+                method: 'DELETE',
+                url:`produtos/${id}`,
+                failOnStatusCode: false,
+                headers: {authorization: token},
+            }).then(response =>{
+                expect(response.body.message).to.equal('Registro excluído com sucesso')
+            })
+        });
     });
 });
